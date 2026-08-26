@@ -1,6 +1,8 @@
 # Privacy-Preserving Document Verification using Zero-Knowledge Proofs
 
-A research project that enables users to prove specific facts about their documents without revealing the document itself.
+A research project that enables users to prove specific facts about their documents without revealing the original document or unnecessary sensitive information.
+
+---
 
 ## Project Overview
 
@@ -12,56 +14,61 @@ The system combines:
 
 - OCR-based document processing
 - Attribute extraction
+- Document type detection
+- Claim selection
 - Circom circuits
+- Witness generation
 - Groth16 proof generation
 - Cryptographic proof verification
+- Frontend and backend integration
 
-to achieve privacy-preserving document verification.
+The primary objective is **privacy-preserving and selective document verification**.
 
 ---
 
 ## Problem Statement
 
-In conventional verification systems:
+In conventional document verification systems:
 
-- Complete documents must be shared
-- Sensitive information is exposed unnecessarily
-- Verifiers gain access to data unrelated to the requested verification
+- Complete documents must often be shared.
+- Sensitive personal information is exposed unnecessarily.
+- Verifiers gain access to information unrelated to the requested verification.
+- Data minimization becomes difficult.
 
-For example:
+For example, suppose a verifier only wants to confirm:
 
-To prove:
+> **Age ≥ 18**
 
-- Age ≥ 18
-
-A user typically shares an entire identity document, revealing:
+A conventional verification process may require the user to share an entire identity document containing:
 
 - Full name
 - Date of birth
 - Address
-- Document number
+- Identification number
+- Other personal information
 
-This violates the principle of minimum disclosure.
+This exposes significantly more information than is required.
 
 ---
 
 ## Proposed Solution
 
-The proposed system allows users to:
+The proposed system uses Zero-Knowledge Proofs to allow a user to prove a selected claim without directly sharing the original document with the verifier.
 
-1. Upload a document
-2. Select verification claims
-3. Generate a Zero-Knowledge Proof
-4. Download proof files
-5. Share only the proof files with a verifier
+The general workflow is:
 
-The verifier can then:
+1. Upload a supported document.
+2. Process the document using OCR or text extraction.
+3. Detect the document type.
+4. Extract relevant attributes.
+5. Select a verification claim.
+6. Generate circuit inputs.
+7. Generate a witness.
+8. Generate a Groth16 Zero-Knowledge Proof.
+9. Download or share the generated proof artifacts.
+10. Allow another party to independently verify the proof.
 
-1. Upload the proof files
-2. Verify the proof cryptographically
-3. Confirm the claim is true
-
-without accessing the original document.
+The verifier can cryptographically determine whether the claim is valid without requiring the original document.
 
 ---
 
@@ -69,46 +76,79 @@ without accessing the original document.
 
 ### Privacy-Preserving Verification
 
-Verify document attributes without revealing the document itself.
+Verify selected document attributes without requiring the verifier to access the complete original document.
 
 ### OCR-Based Processing
 
-Automatically extracts information from:
+The system supports document processing and information extraction from supported formats including:
 
-- PDF documents
-- Image documents
+- PDF
+- Images
+- DOCX
+- Text files
 
-### Supported Claims
+### Document Type Detection
 
-#### Aadhaar Documents
+The system identifies the type of document and selects the appropriate processing and verification logic.
+
+### Attribute Extraction
+
+Relevant attributes are extracted from the processed document before generating the Zero-Knowledge Proof.
+
+### Claim-Based Verification
+
+Users can select specific claims instead of proving or revealing the entire document.
+
+### Zero-Knowledge Proof Generation
+
+The system generates cryptographic proof artifacts using Circom and SnarkJS with the Groth16 proving system.
+
+Generated artifacts include:
+
+- `proof.json`
+- `public.json`
+- `verification_key.json`
+
+### Independent Verification
+
+Generated proofs can be verified independently using the corresponding public signals and verification key.
+
+### Multi-Attribute Verification
+
+The system supports verification of multiple attributes using dedicated multi-attribute circuits.
+
+### Proof Download
+
+Generated proof artifacts can be downloaded for later verification or sharing.
+
+### QR-Based Proof Handling
+
+The frontend includes QR-based functionality for handling proof information.
+
+---
+
+## Supported Verification Claims
+
+### Aadhaar Documents
+
+The system includes circuits and processing support for:
 
 - Name Verification
 - Age ≥ 18 Verification
 - Gender Verification
 - Multi-Attribute Verification
 
-#### Academic Documents
+### Academic Documents
+
+The system includes support for:
 
 - Student Name Verification
 - Result Verification
 - Grade Verification
 - Grand Total Verification
+- Multi-Attribute Verification
 
-### Zero-Knowledge Proof Generation
-
-Generates:
-
-- proof.json
-- public.json
-- verification_key.json
-
-### Independent Verification
-
-Verifiers can independently verify proofs without accessing original documents.
-
-### Multi-Attribute Verification
-
-Supports verification of multiple claims using a single proof.
+The exact claims available depend on the detected document type and the corresponding circuit configuration.
 
 ---
 
@@ -118,42 +158,10 @@ Supports verification of multiple claims using a single proof.
 
 ```text
 Upload Document
-        ↓
-OCR Extraction
-        ↓
-Attribute Extraction
-        ↓
-Select Claims
-        ↓
-Generate Circuit Inputs
-        ↓
-Witness Generation
-        ↓
-Groth16 Proof Generation
-        ↓
-Download Proof Files
-```
-
-### Verifier Workflow
-
-```text
-Upload proof.json
-Upload public.json
-Upload verification_key.json
-          ↓
-Cryptographic Verification
-          ↓
-VALID / INVALID PROOF
-```
-
----
-
-## System Architecture
-
-```text
-Document Upload
        ↓
-OCR Processing
+Document Processing
+       ↓
+OCR / Text Extraction
        ↓
 Document Type Detection
        ↓
@@ -163,13 +171,93 @@ Claim Selection
        ↓
 Input Generation
        ↓
-Circom Circuit
-       ↓
 Witness Generation
        ↓
 Groth16 Proof Generation
        ↓
-Proof Verification
+Proof Artifact Generation
+       ↓
+Download / Share Proof
+```
+
+### Verifier Workflow
+
+```text
+Receive Proof Artifacts
+       ↓
+Upload Proof
+       ↓
+Load Public Signals
+       ↓
+Load Verification Key
+       ↓
+Cryptographic Verification
+       ↓
+VALID / INVALID PROOF
+```
+
+---
+
+## System Architecture
+
+```text
+                         ┌─────────────────────┐
+                         │    User Document    │
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │ Document Processing │
+                         │ OCR / Text Extract  │
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │  Document Type      │
+                         │     Detection       │
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │ Attribute Extraction│
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │   Claim Selection   │
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │   Input Generation  │
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │   Circom Circuit    │
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │ Witness Generation  │
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │ Groth16 Proof       │
+                         │    Generation       │
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │   Proof Artifact    │
+                         │     Generation      │
+                         └──────────┬──────────┘
+                                    │
+                                    ↓
+                         ┌─────────────────────┐
+                         │ Proof Verification  │
+                         └─────────────────────┘
 ```
 
 ---
@@ -197,16 +285,21 @@ Proof Verification
 - Groth16
 - Poseidon Hash
 
-### OCR
+### OCR and Document Processing
 
 - Tesseract OCR
-- PDF Parsing
+- PDF parsing
+- DOCX extraction
+- Image processing
+- Text extraction
 
 ### Development Environment
 
-- Ubuntu (WSL)
+- Windows
+- Ubuntu / WSL
 - Node.js
 - Git
+- GitHub
 
 ---
 
@@ -215,24 +308,64 @@ Proof Verification
 ```text
 ZKP-DOCVerify
 │
-├── api-server-new
-│   ├── routes
+├── backend
+│   ├── issuer
+│   │   ├── generateKeys.js
+│   │   ├── issuerConfig.js
+│   │   ├── signDocument.js
+│   │   └── test-authenticity.js
+│   │
 │   ├── middleware
-│   ├── uploads
+│   │   └── errorHandler.js
+│   │
+│   ├── routes
+│   │   ├── authenticityVerifier.js
+│   │   ├── download.js
+│   │   ├── generateProof.js
+│   │   ├── getProof.js
+│   │   ├── health.js
+│   │   ├── ocr.js
+│   │   ├── upload.js
+│   │   └── verifyProof.js
+│   │
+│   ├── services
+│   │   ├── proofMutex.js
+│   │   └── proofStore.js
+│   │
+│   ├── zk-document-verification
+│   │   ├── circuits
+│   │   ├── config
+│   │   ├── extractors
+│   │   ├── processors
+│   │   ├── samples
+│   │   ├── verification keys
+│   │   └── main.js
+│   │
+│   ├── package.json
 │   └── server.js
 │
-├── zkp-verify
-│   └── Frontend Application
+├── frontend
+│   └── zkp-verify
+│       ├── src
+│       │   ├── components
+│       │   ├── config
+│       │   ├── content
+│       │   ├── context
+│       │   ├── hooks
+│       │   ├── layouts
+│       │   ├── lib
+│       │   ├── pages
+│       │   ├── routes
+│       │   ├── services
+│       │   └── utils
+│       │
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── vite.config.ts
 │
-└── zk-document-verification
-    ├── circuits
-    ├── config
-    ├── extractors
-    ├── processors
-    ├── documents
-    ├── inputs
-    ├── proofs
-    └── main.js
+├── .gitignore
+├── README.md
+└── vercel.json
 ```
 
 ---
@@ -242,77 +375,117 @@ ZKP-DOCVerify
 ### Clone Repository
 
 ```bash
-git clone https://github.com/gaddamaditya/privacy-preserving-document-verification.git
+git clone https://github.com/theleodas/zkp-document-verification.git
+```
 
-cd privacy-preserving-document-verification
+Navigate into the project:
+
+```bash
+cd zkp-document-verification
 ```
 
 ---
 
 ## Backend Setup
 
+Navigate to the backend:
+
 ```bash
-cd api-server-new
+cd backend
+```
 
+Install dependencies:
+
+```bash
 npm install
+```
 
+Start the backend server:
+
+```bash
 node server.js
 ```
 
-Backend runs at:
-
-```text
-http://localhost:3001
-```
+The backend server runs locally according to the configured server port.
 
 ---
 
 ## Frontend Setup
 
+Open another terminal and navigate to:
+
 ```bash
-cd zkp-verify/zkp-verify
+cd frontend/zkp-verify
+```
 
+Install dependencies:
+
+```bash
 npm install
+```
 
+Start the frontend development server:
+
+```bash
 npm run dev
 ```
 
-Frontend runs at:
-
-```text
-http://localhost:5173
-```
+The Vite development server will provide the local frontend URL in the terminal.
 
 ---
 
 ## ZKP Engine Setup
 
-```bash
-cd zk-document-verification
+Navigate to the ZKP engine:
 
+```bash
+cd backend/zk-document-verification
+```
+
+Install dependencies:
+
+```bash
 npm install
 ```
 
-### Verify Installation
+The ZKP engine contains the Circom circuits, input generators, witness generation logic, proof generation logic, and verification logic.
+
+---
+
+## Verify ZKP Installation
+
+Check Circom:
 
 ```bash
 circom --version
+```
 
+Check SnarkJS:
+
+```bash
 snarkjs --version
 ```
+
+Both tools should be available in the development environment before compiling or generating proofs.
 
 ---
 
 ## Usage
 
-### Generate Proof
+### Generate a Proof
 
-1. Open Generate Proof page
-2. Upload a supported document
-3. Review OCR results
-4. Select verification claims
-5. Click Generate Proof
-6. Download:
+1. Open the frontend application.
+2. Navigate to the **Generate Proof** page.
+3. Upload a supported document.
+4. Allow the system to process the document.
+5. Review the extracted information.
+6. Select the verification claim.
+7. Generate the circuit inputs.
+8. Generate the witness.
+9. Generate the Zero-Knowledge Proof.
+10. Download the generated proof artifacts.
+
+The generated artifacts include:
 
 ```text
 proof.json
@@ -322,21 +495,17 @@ verification_key.json
 
 ---
 
-### Verify Proof
+## Verify a Proof
 
-1. Open Verify Proof page
-2. Upload:
+1. Open the **Verify Proof** page.
+2. Upload the generated proof.
+3. Upload the corresponding public signals.
+4. Upload the verification key.
+5. Click **Verify Proof**.
+6. The system performs cryptographic verification.
+7. The result is displayed as either a valid or invalid proof.
 
-```text
-proof.json
-public.json
-verification_key.json
-```
-
-3. Click Verify Proof
-4. View verification result
-
-Example:
+Example successful result:
 
 ```text
 ✓ VALID PROOF
@@ -344,7 +513,7 @@ Example:
 This proof is cryptographically valid.
 ```
 
-or
+Example failed result:
 
 ```text
 ✗ INVALID PROOF
@@ -354,106 +523,209 @@ This proof failed cryptographic verification.
 
 ---
 
+## Zero-Knowledge Proof Process
+
+The Zero-Knowledge Proof pipeline follows these stages:
+
+```text
+Document
+   ↓
+Extract Attributes
+   ↓
+Select Claim
+   ↓
+Generate Circuit Inputs
+   ↓
+Witness Generation
+   ↓
+Groth16 Proving
+   ↓
+Proof + Public Signals
+   ↓
+Cryptographic Verification
+```
+
+The private document information is used during the proving process, while the verifier receives the proof artifacts required for cryptographic verification.
+
+---
+
 ## Security and Privacy
 
 The system is designed around the principle of **Selective Disclosure**.
 
+The objective is to minimize the amount of sensitive information that must be shared during verification.
+
 ### Private Information
 
-Never shared with the verifier:
+The following information is intended to remain with the prover:
 
 - Original document
 - Raw OCR text
-- Personal details
-- Sensitive attributes
+- Sensitive personal details
+- Private document attributes
+- Private circuit inputs
 
 ### Shared Information
 
-Only:
+The verifier receives the cryptographic proof artifacts required for verification, such as:
 
 - Zero-Knowledge Proof
 - Public Signals
 - Verification Key
 
-This allows verification without revealing document contents.
+This enables a verifier to determine whether the selected claim is satisfied without requiring direct access to the original document.
+
+---
+
+## Example Use Case
+
+Consider an identity document containing:
+
+```text
+Name: Example User
+Date of Birth: 01/01/2000
+Address: Example Address
+Identification Number: XXXXXXXX
+```
+
+A verifier may only need to know whether the individual is at least 18 years old.
+
+Instead of sharing the complete document, the system can generate a Zero-Knowledge Proof for the claim:
+
+```text
+Age ≥ 18
+```
+
+The verifier can then verify the proof without receiving the complete identity document.
+
+This demonstrates the principle of **minimum disclosure**.
 
 ---
 
 ## Research Contribution
 
-This project demonstrates how Zero-Knowledge Proofs can be applied to document verification systems to improve privacy and reduce unnecessary data exposure.
+This project demonstrates the application of Zero-Knowledge Proofs to privacy-preserving document verification.
 
-The implementation integrates:
+The implementation integrates multiple components into an end-to-end workflow:
 
+- Document processing
 - OCR
-- Attribute Extraction
-- Circom Circuits
-- Groth16 Proving
-- Cryptographic Verification
+- Attribute extraction
+- Document type detection
+- Claim selection
+- Circuit input generation
+- Circom circuit design
+- Witness generation
+- Groth16 proof generation
+- Cryptographic proof verification
+- Frontend and backend integration
 
-into a complete end-to-end verification workflow.
+The project demonstrates how ZKPs can reduce unnecessary exposure of sensitive information while still allowing a verifier to establish the validity of a selected claim.
 
 ---
 
 ## Future Scope
 
+Potential future improvements include:
+
 - Additional document types
-- PAN card support
+- PAN card verification
 - Passport verification
 - Degree certificate verification
 - Blockchain integration
-- Smart contract verification
+- Smart contract-based verification
 - Decentralized proof storage
 - Mobile application support
+- Additional document attributes
+- More complex multi-attribute claims
+- Issuer-based document authenticity verification
+- Improved OCR accuracy
+- Distributed verification infrastructure
 
 ---
 
-## Screenshots
 
-### Home Page
+## Limitations
 
-_Add screenshots here_
+The current implementation depends on accurate document processing and attribute extraction.
 
-### Generate Proof
+OCR-based extraction may be affected by:
 
-_Add screenshots here_
+- Image quality
+- Document orientation
+- Font styles
+- Blurred documents
+- Complex layouts
+- Incorrectly detected text
 
-### Verify Proof
-
-_Add screenshots here_
-
-### Proof Verification Result
-
-_Add screenshots here_
+The generated proof also depends on the correctness of the configured circuit and its corresponding proving and verification artifacts.
 
 ---
 
-## Author
+## Development
 
-### Adithya Gaddam
+The project is organized into separate frontend, backend, and Zero-Knowledge Proof components.
 
-B.Tech Computer Science and Engineering
+### Frontend
 
-SRM University AP
+The frontend provides the user interface for:
 
-Summer Research Internship Project
+- Document upload
+- Claim selection
+- Proof generation
+- Proof downloading
+- Proof verification
+- Verification history
+- Navigation and workflow presentation
 
-### Contact
+### Backend
 
-Email:
+The backend provides APIs for:
 
-```text
-gaddamaditya8@gmail.com
-```
+- Document upload
+- OCR processing
+- Proof generation
+- Proof retrieval
+- Proof verification
+- Download operations
+- Health checks
+- Authenticity verification
 
-GitHub:
+### ZKP Engine
 
-```text
-https://github.com/gaddamaditya
-```
+The ZKP engine provides:
+
+- Document extraction
+- Attribute extraction
+- Claim generation
+- Input generation
+- Circuit selection
+- Circuit compilation
+- Witness generation
+- Groth16 proof generation
+- Proof verification
+
+---
+
+## GitHub Repository
+
+Repository:
+
+https://github.com/theleodas/zkp-document-verification
+
+---
+
+**Summer Research Internship Project**
+
 
 ---
 
 ## License
 
 This project is developed for academic and research purposes.
+
+---
+
+## Acknowledgements
+
+This project was developed as part of a Summer Research Internship focusing on privacy-preserving document verification and Zero-Knowledge Proof technology.
