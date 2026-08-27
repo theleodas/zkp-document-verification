@@ -374,10 +374,6 @@ ZKP-DOCVerify
 
 ### Clone Repository
 
-```bash
-git clone https://github.com/theleodas/zkp-document-verification.git
-```
-
 Navigate into the project:
 
 ```bash
@@ -602,7 +598,7 @@ This demonstrates the principle of **minimum disclosure**.
 
 ---
 
-## Research Contribution
+##  Contribution
 
 This project demonstrates the application of Zero-Knowledge Proofs to privacy-preserving document verification.
 
@@ -705,27 +701,3 @@ The ZKP engine provides:
 - Groth16 proof generation
 - Proof verification
 
----
-
-## GitHub Repository
-
-Repository:
-
-https://github.com/theleodas/zkp-document-verification
-
----
-
-**Summer Research Internship Project**
-
-
----
-
-## License
-
-This project is developed for academic and research purposes.
-
----
-
-## Acknowledgements
-
-This project was developed as part of a Summer Research Internship focusing on privacy-preserving document verification and Zero-Knowledge Proof technology.
